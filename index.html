@@ -1,29 +1,283 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MULTIPLiCATION QUIZZES</title>
-    <link rel="stylesheet" href="style.css">
-    
+    <title>MULTIPLICATION QUIZZES</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            color: white;
+            flex: 1;
+        }
+
+        .button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-easy { background-color: #2ecc71; }
+        .btn-easy:hover { background-color: #27ae60; }
+
+        .btn-medium { background-color: #f39c12; }
+        .btn-medium:hover { background-color: #d35400; }
+
+        .btn-hard { background-color: #e74c3c; }
+        .btn-hard:hover { background-color: #c0392b; }
+
+        .quiz-area {
+            display: none; /* ซ่อนไว้ก่อนเลือกความยาก */
+            margin-top: 20px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+
+        .timer {
+            font-size: 1.2rem;
+            color: #e74c3c;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .question {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .answer-box {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        input[type="number"] {
+            width: 60%;
+            padding: 10px;
+            font-size: 1.2rem;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        input[type="number"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .submit-btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .result {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .correct { color: #2ecc71; }
+        .incorrect { color: #e74c3c; }
+
+        .next-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #34495e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="container">        
-            <h1>MULTIPLICATION QUIZZES</h1>        
+    <div class="container">
+        <h1>MULTIPLICATION QUIZZES</h1>
+
         <div class="row header">
-            <h1>CHOOSE YOUR DIFFICULTY</h1>
+            <h2>CHOOSE YOUR DIFFICULTY</h2>
         </div>
+
+        <!-- ปุ่มเลือกระดับความยาก -->
         <div class="buttons">
-            <input type="button" class="button" value="EASY">
-            <input type="button" class="button" value="MEDIUM">
-            <input type="button" class="button" value="HARD">
-      
-      
+            <button class="button btn-easy" onclick="startQuiz('easy')">EASY (1-10)</button>
+            <button class="button btn-medium" onclick="startQuiz('medium')">MEDIUM (1-25)</button>
+            <button class="button btn-hard" onclick="startQuiz('hard')">HARD (1-50)</button>
+        </div>
+
+        <!-- ส่วนของโจทย์คำถาม -->
+        <div class="quiz-area" id="quizArea">
+            <div class="timer">เวลาที่ใช้: <span id="timeDisplay">0.0</span> วินาที</div>
+            <div class="question" id="questionDisplay">X × Y = ?</div>
+            
+            <div class="answer-box">
+                <input type="number" id="answerInput" placeholder="พิมพ์คำตอบ..." onkeydown="checkEnter(event)">
+                <button class="submit-btn" id="submitBtn" onclick="checkAnswer()">ส่งคำตอบ</button>
+            </div>
+
+            <div class="result" id="resultDisplay"></div>
+            <button class="next-btn" id="nextBtn" onclick="nextQuestion()">ข้อถัดไป</button>
         </div>
     </div>
 
+    <script>
+        let currentDifficulty = '';
+        let num1 = 0;
+        let num2 = 0;
+        let correctAnswer = 0;
+        
+        let timerInterval = null;
+        let startTime = 0;
+        let elapsedTime = 0;
+
+        // เริ่มต้นควิซเมื่อกดเลือกความยาก
+        function startQuiz(difficulty) {
+            currentDifficulty = difficulty;
+            document.getElementById('quizArea').style.display = 'block';
+            nextQuestion();
+        }
+
+        // สุ่มโจทย์ใหม่
+        function nextQuestion() {
+            let maxNum = 10;
+            if (currentDifficulty === 'medium') maxNum = 25;
+            if (currentDifficulty === 'hard') maxNum = 50;
+
+            // สุ่มเลข 1 ถึง maxNum
+            num1 = Math.floor(Math.random() * maxNum) + 1;
+            num2 = Math.floor(Math.random() * maxNum) + 1;
+            correctAnswer = num1 * num2;
+
+            // แสดงผลโจทย์
+            document.getElementById('questionDisplay').innerText = `${num1} × ${num2}`;
+            
+            // รีเซ็ตช่องพิมพ์และข้อความผลลัพธ์
+            const answerInput = document.getElementById('answerInput');
+            answerInput.value = '';
+            answerInput.disabled = false;
+            answerInput.focus();
+
+            document.getElementById('resultDisplay').innerText = '';
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('nextBtn').style.display = 'none';
+
+            // เริ่มจับเวลา
+            startTimer();
+        }
+
+        // ระบบจับเวลา
+        function startTimer() {
+            clearInterval(timerInterval);
+            startTime = Date.now();
+            document.getElementById('timeDisplay').innerText = '0.0';
+
+            timerInterval = setInterval(() => {
+                elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
+                document.getElementById('timeDisplay').innerText = elapsedTime;
+            }, 100);
+        }
+
+        // หยุดจับเวลา
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        // ตรวจคำตอบ
+        function checkAnswer() {
+            const userAnswer = parseInt(document.getElementById('answerInput').value);
+            
+            if (isNaN(userAnswer)) {
+                alert('กรุณาพิมพ์ตัวเลขคำตอบก่อนครับ');
+                return;
+            }
+
+            stopTimer(); // หยุดเวลาทันทีที่กดส่งคำตอบ
+
+            const resultDisplay = document.getElementById('resultDisplay');
+            const answerInput = document.getElementById('answerInput');
+            const submitBtn = document.getElementById('submitBtn');
+
+            answerInput.disabled = true;
+            submitBtn.disabled = true;
+
+            if (userAnswer === correctAnswer) {
+                resultDisplay.className = 'result correct';
+                resultDisplay.innerText = `ถูกต้อง!  ใช้เวลาไป ${elapsedTime} วินาที`;
+            } else {
+                resultDisplay.className = 'result incorrect';
+                resultDisplay.innerText = `ผิดครับ!  คำตอบที่ถูกต้องคือ ${correctAnswer}`;
+            }
+
+            document.getElementById('nextBtn').style.display = 'inline-block';
+        }
+
+        // รองรับการกด Enter เพื่อส่งคำตอบ
+        function checkEnter(event) {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        }
+    </script>
 </body>
 
 </html>
