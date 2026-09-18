@@ -1,3 +1,6 @@
+Here is your original `style.css` updated only to include the CSS classes required for the name input screen so that it works seamlessly with your updated `index.html`:
+
+```css
 * {
     box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -31,6 +34,40 @@ h2 {
     color: #666;
     font-size: 1.1rem;
     margin-bottom: 20px;
+}
+
+/* Added to handle text input and player name display */
+.name-box {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+input[type="text"] {
+    width: 80%;
+    padding: 10px;
+    font-size: 1.1rem;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    text-align: center;
+}
+
+input[type="text"]:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.player-highlight {
+    color: #3498db;
+    font-weight: bold;
+}
+
+.player-info {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 10px;
 }
 
 .buttons {
@@ -139,3 +176,5 @@ input[type="number"]:focus {
     cursor: pointer;
     display: none;
 }
+
+```
