@@ -10,35 +10,51 @@
 
 <body>
     <div class="container">
-        <h1>MULTIPLICATION QUIZZES</h1>
-
-        <div class="row header">
-            <h2>CHOOSE YOUR DIFFICULTY</h2>
+        <!-- 1. Start / Enter Name Screen -->
+        <div id="startScreen">
+            <h1>WELCOME!</h1>
+            <h2>Enter your name to start</h2>
+            <div class="name-box">
+                <input type="text" id="playerNameInput" placeholder="Enter your name..." onkeydown="checkNameEnter(event)">
+                <button class="submit-btn" onclick="submitName()">Continue</button>
+            </div>
         </div>
 
-        <!-- Difficulty Selection Buttons -->
-        <div class="buttons">
-            <button class="button btn-easy" onclick="startQuiz('easy')">EASY (1-10)</button>
-            <button class="button btn-medium" onclick="startQuiz('medium')">MEDIUM (1-25)</button>
-            <button class="button btn-hard" onclick="startQuiz('hard')">HARD (1-50)</button>
-        </div>
+        <!-- 2. Game Content Area (Hidden by default) -->
+        <div id="gameContent" style="display: none;">
+            <h1>MULTIPLICATION QUIZZES</h1>
 
-        <!-- Quiz Area -->
-        <div class="quiz-area" id="quizArea">
-            <div class="timer">Time Elapsed: <span id="timeDisplay">0.0</span>s</div>
-            <div class="question" id="questionDisplay">X × Y = ?</div>
-            
-            <div class="answer-box">
-                <input type="number" id="answerInput" placeholder="Enter answer..." onkeydown="checkEnter(event)">
-                <button class="submit-btn" id="submitBtn" onclick="checkAnswer()">Submit</button>
+            <!-- Difficulty Selection Screen -->
+            <div id="difficultyScreen">
+                <h2>PLAYER: <span id="displayName" class="player-highlight"></span></h2>
+                <h2>CHOOSE YOUR DIFFICULTY</h2>
+
+                <div class="buttons">
+                    <button class="button btn-easy" onclick="startQuiz('easy')">EASY (1-10)</button>
+                    <button class="button btn-medium" onclick="startQuiz('medium')">MEDIUM (1-25)</button>
+                    <button class="button btn-hard" onclick="startQuiz('hard')">HARD (1-50)</button>
+                </div>
             </div>
 
-            <div class="result" id="resultDisplay"></div>
-            <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question</button>
+            <!-- Quiz Area -->
+            <div class="quiz-area" id="quizArea">
+                <div class="player-info">Player: <span id="quizPlayerName" class="player-highlight"></span></div>
+                <div class="timer">Time Elapsed: <span id="timeDisplay">0.0</span>s</div>
+                <div class="question" id="questionDisplay">X × Y = ?</div>
+                
+                <div class="answer-box">
+                    <input type="number" id="answerInput" placeholder="Enter answer..." onkeydown="checkEnter(event)">
+                    <button class="submit-btn" id="submitBtn" onclick="checkAnswer()">Submit</button>
+                </div>
+
+                <div class="result" id="resultDisplay"></div>
+                <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question</button>
+            </div>
         </div>
     </div>
 
     <script>
+        let playerName = '';
         let currentDifficulty = '';
         let num1 = 0;
         let num2 = 0;
@@ -47,6 +63,26 @@
         let timerInterval = null;
         let startTime = 0;
         let elapsedTime = 0;
+
+        function submitName() {
+            const input = document.getElementById('playerNameInput').value.trim();
+            if (input === '') {
+                alert('Please enter your name!');
+                return;
+            }
+            playerName = input;
+            document.getElementById('displayName').innerText = playerName;
+            document.getElementById('quizPlayerName').innerText = playerName;
+
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameContent').style.display = 'block';
+        }
+
+        function checkNameEnter(event) {
+            if (event.key === 'Enter') {
+                submitName();
+            }
+        }
 
         function startQuiz(difficulty) {
             currentDifficulty = difficulty;
